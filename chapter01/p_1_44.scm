@@ -76,7 +76,7 @@
     (kaijo x (- j 1))
   )
   (define repeat-average-damp
-    (let ((dec-j (- j 2))) ; decrement value
+    (let ((dec-j (floor (log j 2)))) ; decrement value
       (if (> dec-j 0)
           (lambda (x) ((repeated average-damp dec-j) x))
           (lambda (x) (average-damp x))
@@ -88,12 +88,20 @@
 
 (display "(jokon 2 2) => ")
 (print (jokon 2 2))
-(display "(jokon 2 3) => ")
-(print (jokon 2 3))
-(display "(jokon 2 4) => ")
-(print (jokon 2 4))
-(display "(jokon 2 5) => ")
-(print (jokon 2 5))
+(display "(jokon 8 3) => ")
+(print (jokon 8 3))
+(display "(jokon 16 4) => ")
+(print (jokon 16 4))
+(display "(jokon 32 5) => ")
+(print (jokon 32 5))
+(display "(jokon 128 7) => ")
+(print (jokon 128 7))
+(display "(jokon 256 8) => ")
+(print (jokon 256 8))
+(display "(jokon 512 9) => ")
+(print (jokon 512 9))
+
+
 
 (print "----------------")
 

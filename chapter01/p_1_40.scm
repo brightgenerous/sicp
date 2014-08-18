@@ -119,8 +119,14 @@
   ((repeated smooth count) f)
 )
 
-(display "((smooth-fold (lambda (x) (* x x)) 1) 10)")
+(display "((smooth-fold (lambda (x) (* x x)) 1) 10) ")
 (print ((smooth-fold (lambda (x) (* x x)) 1) 10))
 
-(display "((smooth-fold (lambda (x) (* x x)) 2) 10)")
+(display "((smooth-fold (lambda (x) (* x x)) 2) 10) ")
 (print ((smooth-fold (lambda (x) (* x x)) 2) 10))
+
+(display "((smooth-fold square 2) 3) ")
+(print ((smooth-fold square 2) 3))
+
+(display "((smooth (smooth square)) 3)) ")
+(print ((smooth (smooth square)) 3))
