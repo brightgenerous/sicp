@@ -11,6 +11,14 @@
   (cons x y)
 )
 
+(define (start-segment segment)
+  (car segment)
+)
+
+(define (end-segment segment)
+  (cdr segment)
+)
+
 (define (x-point p)
   (car p)
 )
@@ -21,8 +29,8 @@
 
 (define (midpoint-segment segment)
   (define (average a b) (/ (+ a b) 2))
-  (make-point (average (car (car segment)) (car (cdr segment)))
-              (average (cdr (car segment)) (cdr (cdr segment)))
+  (make-point (average (x-point (start-segment segment)) (x-point (end-segment segment)))
+              (average (y-point (start-segment segment)) (y-point (end-segment segment)))
   )
 )
 
@@ -77,12 +85,12 @@
   (make-segment start end)
 )
 
-(define (length a b) 
+(define (length a b)
   (abs (- a b))
 )
 
 (define (width rectangle)
-  (length (x-point (start-point rectangle)) 
+  (length (x-point (start-point rectangle))
           (x-point (end-point rectangle))
   )
 )
