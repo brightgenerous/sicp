@@ -55,10 +55,8 @@
 (define (disp-interval desc interval)
   (display desc)
   (print interval)
-  (display "  lower-bound => ")
-  (print (lower-bound interval))
-  (display "  upper-bound => ")
-  (print (upper-bound interval))
+  (display "  (lower, upper) => ")
+  (print (cons (lower-bound interval) (upper-bound interval)))
 )
 
 ; --
@@ -175,18 +173,14 @@
   (display "[interval-1] => ")
   (display interval-1)
   (newline)
-  (display "  upper => ")
-  (display (upper-bound interval-1))
-  (display " lower => ")
-  (display (lower-bound interval-1))
+  (display "  (lower, upper) => ")
+  (display (cons (lower-bound interval-1) (upper-bound interval-1)))
   (newline)
   (display "[interval-2] => ")
   (display interval-2)
   (newline)
-  (display "  upper => ")
-  (display (upper-bound interval-2))
-  (display " lower => ")
-  (display (lower-bound interval-2))
+  (display "  (lower, upper) => ")
+  (display (cons (lower-bound interval-2) (upper-bound interval-2)))
   (newline)
   (display "  (/ (lower-bound interval-1) (lower-bound interval-2)) => ")
   (print (/ (lower-bound interval-1) (lower-bound interval-2)))
@@ -203,18 +197,14 @@
   (display "[interval-1] => ")
   (display interval-1)
   (newline)
-  (display "  upper => ")
-  (display (upper-bound interval-1))
-  (display " lower => ")
-  (display (lower-bound interval-1))
+  (display "  (lower, upper) => ")
+  (display (cons (lower-bound interval-1) (upper-bound interval-1)))
   (newline)
   (display "[interval-2] => ")
   (display interval-2)
   (newline)
-  (display "  upper => ")
-  (display (upper-bound interval-2))
-  (display " lower => ")
-  (display (lower-bound interval-2))
+  (display "  (lower, upper) => ")
+  (display (cons (lower-bound interval-2) (upper-bound interval-2)))
   (newline)
   (display "  (/ (lower-bound interval-1) (lower-bound interval-2)) => ")
   (print (/ (lower-bound interval-1) (lower-bound interval-2)))
@@ -371,5 +361,200 @@
     (cons (make-interval -6 -12) (make-interval 2 3))
     (cons (make-interval -6 -12) (make-interval -2 3))
     (cons (make-interval -6 -12) (make-interval -2 -3))
+  )
+)
+
+(print "----------------")
+
+(print "問題2.12")
+(print "--")
+
+(define (make-center-width c w)
+  (make-interval (- c w) (+ c w))
+)
+
+(define (center i)
+  (/ (+ (lower-bound i) (upper-bound i)) 2)
+)
+
+(define (width i)
+  (/ (- (upper-bound i) (lower-bound i)) 2)
+)
+
+; --
+
+(define (make-center-percent c p)
+  (let
+    (
+      (cp (* c p))
+    )
+    (make-interval (- c cp) (+ c cp))
+  )
+)
+
+(define (percent i)
+  (let
+    (
+      (c (center i))
+      (u (upper-bound i))
+    )
+    (/ (- u c) c)
+    ;; (- (/ u c) 1)
+  )
+)
+
+(define interval-1 (make-center-percent 10 0.1))
+(disp-interval "[interval-1] => " interval-1)
+(display "  (percent interval-1) => ")
+(print (percent interval-1))
+
+(define interval-2 (make-center-percent -10 0.15))
+(disp-interval "[interval-2] => " interval-2)
+(display "  (percent interval-2) => ")
+(print (percent interval-2))
+
+
+(print "----------------")
+
+(print "問題2.13")
+(print "--")
+
+;
+;
+; (x-c, x-p) * (y-c, y-p)
+;
+;   (x-l, x-u) --> (- x-c (* x-c x-p), (+ x-c (* x-c x-p)))
+;   (y-l, y-u) --> (- y-c (* y-c y-p), (+ y-c (* y-c y-p)))
+;
+;   ;; 全て正
+;   (xy-l, xy-u)
+;     --> ((* x-l y-l), (* x-u y-u))
+;     --> (
+;           (* (- x-c (* x-c x-p)) (- y-c (* y-c y-p))),
+;           (* (+ x-c (* x-c x-p)) (+ y-c (* y-c y-p)))
+;         )
+;
+;
+; Mul-Percent
+;
+;      center * percent = width
+;      percent = width / center
+;              = (upper - center) / center
+;              = (upper / center) - 1
+;              = (upper / ((upper - lower) / 2)) - 1
+;
+;
+;               xy-u
+;          --------------- - 1
+;            xy-u - xy-l
+;           -------------
+;                 2
+;
+;
+; == x-l, x-u, y-l, y-u で表現
+;
+;
+;            x-u * y-u
+; ------------------------------ - 1
+;    (x-u * y-u) - (x-l * y-l)
+;   ---------------------------
+;                2
+;
+;
+;                  -----------------------------------------
+;
+;
+;  x-l --> (x-c - x-c * x-p)
+;  y-l --> (y-c - y-c * y-p)
+;  x-u --> (x-c + x-c * x-p)
+;  y-u --> (y-c + y-c * y-p)
+;
+; (* x-l y-l)
+;            --> x-c       * y-c
+;              - x-c       * y-c * y-p
+;              - x-c * x-p * y-c
+;              + x-c * x-p * y-c * y-p
+;           ---> x-c * y-c * (1 - x-p - y-p + x-p * y-p)
+;
+; (* x-u y-u)
+;            --> x-c       * y-c
+;              + x-c       * y-c * y-p
+;              + x-c * x-p * y-c
+;              + x-c * x-p * y-c * y-p
+;           ---> x-c * y-c * (1 + x-p + y-p + x-p * y-p)
+;
+; (- (* x-u y-u) (* x-l y-l))
+;            --> x-c * y-c * (x-p + x-p + y-p + y-p)
+;           ---> 2 * x-c * y-c * (x-p + y-p)
+;
+;
+; (/ (- (* x-u y-u) (* x-l y-l)) 2)
+;           ---> x-c * y-c * (x-p + y-p)
+;
+;
+;                  -----------------------------------------
+;
+;
+; == x-c, x-p, y-c, y-p で表現
+;
+;
+;   x-c * y-c * (1 + x-p + y-p + x-p * y-p)
+;  ----------------------------------------- - 1
+;           x-c * y-c * (x-p + y-p)
+;
+;
+;         1 + x-p + y-p + x-p * y-p
+;        --------------------------- - 1
+;                x-p + y-p
+;
+;
+;       1 + x-p * y-p
+;      --------------- + 1 - 1
+;         x-p + y-p
+;
+;
+;       1 + x-p * y-p
+;      ---------------
+;         x-p + y-p
+;
+;
+;
+
+; --
+
+(for-each
+  (lambda (xy)
+    (let
+      (
+        (x (car xy))
+        (y (cdr xy))
+        (mul-xy (mul-interval (car xy) (cdr xy)))
+      )
+      (disp-interval "[interval-1] " x)
+      (display "  (center, percent) => ")
+      (display (cons (center x) (percent x)))
+      (newline)
+      (disp-interval "[interval-2] " y)
+      (display "  (center, percent) => ")
+      (display (cons (center y) (percent y)))
+      (newline)
+      (disp-interval "(mul-interval interval-1 interval-2) " mul-xy)
+      (display "  (center, percent) => ")
+      (display (cons (center mul-xy) (percent mul-xy)))
+      (newline)
+      (display "  (* (center interval-1) (center interval-2)) => ")
+      (display (* (center x) (center y)))
+      (newline)
+      (display "  (+ (percent interval-1) (percent interval-2)) => ")
+      (display (+ (percent x) (percent y)))
+      (newline)
+      (newline)
+    )
+  )
+  (list
+    (cons (make-center-percent 5 0.1) (make-center-percent 10 0.3))
+    (cons (make-center-percent 5 0.01) (make-center-percent 10 0.03))
+    (cons (make-center-percent 5 0.001) (make-center-percent 10 0.003))
+    (cons (make-center-percent 5 0.0001) (make-center-percent 10 0.0003))
   )
 )
