@@ -75,9 +75,14 @@
 (print "問題2.8")
 (print "--")
 
+;(define (sub-interval x y)
+;  (make-interval (- (lower-bound x) (lower-bound y))
+;                 (- (upper-bound x) (upper-bound y))
+;  )
+;)
 (define (sub-interval x y)
-  (make-interval (- (lower-bound x) (lower-bound y))
-                 (- (upper-bound x) (upper-bound y))
+  (make-interval (- (lower-bound x) (upper-bound y))
+                 (- (upper-bound x) (lower-bound y))
   )
 )
 
@@ -104,7 +109,7 @@
 ;   => (define width-1 (width interval-1))
 ;   => (define width-2 (width interval-2))
 ;   ex. (define (add-width width-1 width-2) (+ width-1 width-2))
-;       (define (sub-width width-1 width-2) (abs (- width-1 width-2)))
+;       (define (sub-width width-1 width-2) (+ width-1 width-2))
 ;       (define (mul-width width-1 width-2) (* width-1 width-2))
 ;       (define (sub-width width-1 width-2) (/ width-1 width-2))
 ;
@@ -144,10 +149,10 @@
 (print (width (add-interval interval-1 interval-2)))
 
 (print "-- sub width --")
-(display "(abs (- (width interval-1) (width interval-2))) => ")
-(print (abs (- (width interval-1) (width interval-2))))
+(display "(+ (width interval-1) (width interval-2))    => ")
+(print (+ (width interval-1) (width interval-2)))
 
-(display "(width (sub-interval interval-1 interval-2))    => ")
+(display "(width (sub-interval interval-1 interval-2)) => ")
 (print (width (sub-interval interval-1 interval-2)))
 
 (print "-- mul width --")
@@ -398,7 +403,7 @@
       (c (center i))
       (u (upper-bound i))
     )
-    (/ (- u c) c)
+    (abs (/ (- u c) c))
     ;; (- (/ u c) 1)
   )
 )
