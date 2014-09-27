@@ -18,3 +18,6 @@ tmp
 vendor/
 
 .DS_Store
+
+
+*.class
