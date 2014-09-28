@@ -1,6 +1,6 @@
 #! /usr/bin/ruby
 
-# https://codeiq.jp/ace/ozy_ozuzu/q1094
+# https://codeiq.jp/ace/thisweek_masuipeo/q1094
 
 
 class Array
