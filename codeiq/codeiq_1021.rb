@@ -36,9 +36,16 @@ def points
       lines << line
     end
   else
-    lines << "O-O"
-    lines << "O-O"
-    lines << "OO-"
+    lines << "XXXXXXOOXX"
+    lines << "XXXOOXXXOO"
+    lines << "XXOOXXXOOO"
+    lines << "OOXXXXXOXX"
+    lines << "XXXXOXXOXX"
+    lines << "XXXXOXXOXO"
+    lines << "OOXXXOXXXO"
+    lines << "OOOOXOXOOX"
+    lines << "OOXOOOOXXO"
+    lines << "XOOOOXXOOO"
   end
   lines.zip(0..Float::INFINITY).flat_map { |line, y|
     line.chars.zip(0..Float::INFINITY).map { |c, x|

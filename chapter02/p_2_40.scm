@@ -288,22 +288,6 @@
 (print "問題2.43")
 (print "--")
 
-;
-; 元のやつ
-;        ループ回数 * 要素数(filter無視)
-;        (list `())
-;            1 * 1
-;        (list A B C D)
-;          + 1 * 4
-;        => (list AA AB ...)
-;          + 1 * 16
-;        => (list AAA AAB ...)
-;          + 1 * 64
-;        => (list AAAA AAAB ...)
-;          + 1 * 256
-;
-; Reasonerのやつ
-;
 (define (queens-pain board-size)
   (define (queen-cols k)
     (if (= k 0)
@@ -326,97 +310,121 @@
   )
   (queen-cols board-size)
 )
+
 ;
-;        要素数の掛け算(filter無視)
-;          上方が内側のループ
+; 元のやつ
+;          ↓  T4_0-1
+;             (何も無しから `() を生成)
 ;        (list `())
-;          * 1
+;          ↓  T4_1-2
+;             ('() から (list A B C D) を生成)
 ;        (list A B C D)
-;          * 4
-;        => (list AA AB ...)
-;          * 16
-;        => (list AAA AAB ...)
-;          * 64
-;        => (list AAAA AAAB ...)
-;          * 256
+;          ↓  T4_2-3
+;             ((list A B C D) から (list AA AB AC ... DD) を生成)
+;        => (list AA AB ... DD)
+;          ↓  T4_3-4
+;             ((list AA AB AC ... DD) から (list AAA AAB AAC ... DDD) を生成)
+;        => (list AAA AAB ... DDD)
+;          ↓  T4_4-5
+;             ((list AAA AAB AAC ... DDD) から (list AAAA AAAB AAAC ... DDDD) を生成)
+;        => (list AAAA AAAB ... DDDD)
 ;
-;      (filterを無視して)
-;      ((A B C D) (B B C D))
-;      とあった場合、
-;      前者のやり方では
-;        (cons A (B C D)) の (B C D) は使いまわされていた
-;        branch の root から leaf へ
-;      後者のやり方では
-;        (cons A (B C D)) の (B C D) は都度、再帰で生成されている
-;        使い回しが一切ない
-;        branch の leaf から root へ
+;   => T4_0-1 + T4_1-2 + T4_2-3 + T4_3-4 + T4_4-5
 ;
+; Reasonerのやつ
+;
+;        (list AAAA AAAB ... DDDD)
+;          ↑  T4_4-5
+;        (list AAA AAB ... DDD)
+;          ↑  T4_3-4 * 4
+;        (list AA AB ... DD)
+;          ↑  T4_2-3 * 4 * 4
+;        (list A B C D)
+;          ↑  T4_1-2 * 4 * 4 * 4
+;        (list `())
+;          ↑  T4_0-1 * 4 * 4 * 4 * 4
+;
+;   => T4_0-1 * 4^4 + T4_1-2 * 4^3 + T4_2-3 * 4^2 + T4_3-4 * 4^1 + T4_4-5
 ;
 
-(print "(queens 6)")
-(time (queens 6))
-(print "(queens-pain 6)")
-(time (queens-pain 6))
-
-(define (safe? k positions)
-  #t
+(for-each
+  (lambda (x)
+    (display "(queens ")(display x)(display ")")(newline)
+    (time (queens x))
+    (display "(queens-pain ")(display x)(display ")")(newline)
+    (time (queens-pain x))
+  )
+  (enumerate-interval 4 7)
 )
-(print "after-----")
 
-(print "(queens 6)")
-(time (queens 6))
-(print "(queens-pain 6)")
-(time (queens-pain 6))
-(print (queens-pain 6))
-
-;; (queens 5)
-;; ;(time (queens 5))
+;; (queens 4)
+;; ;(time (queens x))
 ;; ; real   0.000
-;; ; user   0.000
-;; ; sys    0.000
-;; (queens-pain 5)
-;; ;(time (queens-pain 5))
-;; ; real   0.005
-;; ; user   0.010
-;; ; sys    0.000
-;; (queens 6)
-;; ;(time (queens 6))
+;; (queens-pain 4)
+;; ;(time (queens-pain x))
 ;; ; real   0.001
-;; ; user   0.000
-;; ; sys    0.000
+;; (queens 5)
+;; ;(time (queens x))
+;; ; real   0.000
+;; (queens-pain 5)
+;; ;(time (queens-pain x))
+;; ; real   0.008
+;; (queens 6)
+;; ;(time (queens x))
+;; ; real   0.001
 ;; (queens-pain 6)
-;; ;(time (queens-pain 6))
-;; ; real   0.093
-;; ; user   0.110
-;; ; sys    0.000
+;; ;(time (queens-pain x))
+;; ; real   0.120
 ;; (queens 7)
-;; ;(time (queens 7))
-;; ; real   0.004
-;; ; user   0.000
-;; ; sys    0.000
+;; ;(time (queens x))
+;; ; real   0.006
 ;; (queens-pain 7)
-;; ;(time (queens-pain 7))
-;; ; real   1.590
-;; ; user   2.090
-;; ; sys    0.060
+;; ;(time (queens-pain x))
+;; ; real   2.222
 ;; (queens 8)
-;; ;(time (queens 8))
-;; ; real   0.073
-;; ; user   0.120
-;; ; sys    0.000
+;; ;(time (queens x))
+;; ; real   0.095
 ;; (queens-pain 8)
-;; ;(time (queens-pain 8))
-;; ; real  33.630
-;; ; user  44.880
-;; ; sys    1.160
+;; ;(time (queens-pain x))
+;; ; real  47.504
+
+
+; --------------------------
+; d | queens | queens-pain
+; --------------------------
+; 4 |  0.000 |  0.001
+; 5 |  0.000 |  0.008
+; 6 |  0.001 |  0.120       | x 120 ? | 6^3 (216) ?
+; 7 |  0.006 |  2.222       | x 350 ? | 7^3 (343) ?
+; 8 |  0.095 | 47.504       | x 500 ? | 8^3 (512) ?
+;
+;   8のとき
+;   => ... + T8_5-6       + T8_6-7       + T8_7-8       + T8_8-9
+;   => ... + T8_5-6 * 8^3 + T8_6-7 * 8^2 + T8_7-8 * 8^1 + T8_8-9
+
+
+;   9のときの予想
+; --------------------------
+; d | queens | queens-pain
+; --------------------------
+; 9 |  1.000 | 729          | x 729 ? | 9^3 (729) ?
+
 ;; (queens 9)
-;; ;(time (queens 9))
-;; ; real   1.081
-;; ; user   1.890
-;; ; sys    0.090
+;; ;(time (queens x))
+;; ; real   1.560
 ;; (queens-pain 9)
-;; ;(time (queens-pain 9))
-;; ; real 840.745
-;; ; user 1154.480
-;; ; sys   17.150
-;;
+;; ;(time (queens-pain x))
+;; ; real 868.281
+
+(print "--")
+
+; 処理時間が何故が逆になる
+;(define (safe? k positions) #t)
+
+;(print "chaged safe?")
+;(print "(queens 6)")
+;(time (queens 6))
+;(print "(queens-pain 6)")
+;(time (queens-pain 6))
+;(print (queens-pain 6))
+
