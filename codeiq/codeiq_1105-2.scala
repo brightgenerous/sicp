@@ -23,8 +23,7 @@ object Main {
 
   def main(args: Array[String]) {
     val kz = data('*')_
-    println(kz(6))
-    println(kz(7))
+    (5 to 7).map(kz).foreach(println)
   }
 }
 
