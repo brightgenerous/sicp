@@ -49,10 +49,10 @@
   (cdr v))
 
 (define (add-vect v1 v2)
-  (make-vect (+ (xcor v1) (xcor v2)) (+ (ycor v1) (ycor v2))))
+  (make-vect (+ (xcor-vect v1) (xcor-vect v2)) (+ (ycor-vect v1) (ycor-vect v2))))
 
 (define (sub-vect v1 v2)
-  (make-vect (- (xcor v1) (xcor v2)) (- (ycor v1) (ycor v2))))
+  (make-vect (- (xcor-vect v1) (xcor-vect v2)) (- (ycor-vect v1) (ycor-vect v2))))
 
 (define (scala-vect scale v1)
   (make-vect (* scale (xcor v1)) (* scale (ycor v1))))
@@ -124,7 +124,7 @@
 
 ; 外形
 (define painter-a
-  (segment->painter (list
+  (segments->painter (list
                       (cons (make-vect 0.0 0.0) (make-vect 0.0 1.0))
                       (cons (make-vect 0.0 1.0) (make-vect 1.0 1.0))
                       (cons (make-vect 1.0 1.0) (make-vect 1.0 0.0))
@@ -133,21 +133,21 @@
 
 ; x
 (define painter-b
-  (segment->painter (list
+  (segments->painter (list
                       (cons (make-vect 0.0 0.0) (make-vect 1.0 1.0))
                       (cons (make-vect 0.0 1.0) (make-vect 1.0 0.0))
                     )))
 
 ; +
 (define painter-c
-  (segment->painter (list
+  (segments->painter (list
                       (cons (make-vect 0.0 0.5) (make-vect 1.0 0.5))
                       (cons (make-vect 0.5 0.0) (make-vect 0.5 1.0))
                     )))
 
 ; wave
 (define painter-d
-  (segment->painter (list
+  (segments->painter (list
                       ;; TODO
                     )))
 
@@ -284,12 +284,12 @@
 ; c
 (define (corner-split-52-c painter n)
   (if (= n 0)
-    (rotate180 painter)                     ;; ここだけ変更
+    (flip-horiz painter)                     ;; ここだけ変更
     (let ((up (up-split painter (- n 1)))
           (right (right-split painter (- n 1))))
       (let ((top-left (beside up up))
             (bottom-right (below right right))
-            (corner (corner-split painter (- n 1))))
+            (corner (corner-split-52-c painter (- n 1))))
         (beside (below painter top-left)
                 (below bottom-right corner))))))
 
