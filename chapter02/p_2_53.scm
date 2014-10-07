@@ -80,6 +80,10 @@
 (print "問題2.55")
 (print "--")
 
-(car ''abracadabra)
+(print (car ''abracadabra))
+(display "(equal? ''ab '(quote ab)) => ")
+(print (equal? ''ab '(quote ab)))
+(display "(equal? ''ab (list 'quote 'ab)) => ")
+(print (equal? ''ab (list 'quote 'ab)))
 ; ''ab => '(quote ab)
 

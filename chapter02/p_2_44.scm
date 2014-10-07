@@ -1,5 +1,7 @@
 (print "----------------")
 
+;;https://github.com/suguni/sicp/blob/master/ch2.2.4-wave.rkt
+
 ;
 ; flip-vert  : 上下逆転
 ; flip-horiz : 左右逆転
@@ -119,4 +121,7 @@
   (lambda (painter n)
     (split-inner painter n))
 )
+
+(define right-split (split beside below))
+(define up-split (split below beside))
 
