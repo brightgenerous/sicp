@@ -5,6 +5,7 @@
 // scala 2.11
 
 object Main {
+
   def data(size: Int) = {
     val lt = (1 to size)
       .map { i => (1 to size).map { _ <= i } }
@@ -14,7 +15,7 @@ object Main {
   }
 
   def main(args: Array[String]) {
-    (6 to 7).map {
+    (5 to 7).map {
       data(_)
         .map { _.map { case true => "*"; case _ => " " }.mkString }
         .mkString("\n")
