@@ -20,7 +20,7 @@ object Main {
 
   def patterns(n: Int) =
     (1 to n).permutations
-      .filter { pattern => println(""); ok(n, pattern) }
+      .filter { pattern => ok(n, pattern) }
 
   // (capacity: Int, current: Int)
   type SandWatch = (Int, Int)
