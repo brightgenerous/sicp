@@ -55,7 +55,7 @@
   (make-vect (- (xcor-vect v1) (xcor-vect v2)) (- (ycor-vect v1) (ycor-vect v2))))
 
 (define (scala-vect scale v1)
-  (make-vect (* scale (xcor v1)) (* scale (ycor v1))))
+  (make-vect (* scale (xcor-vect v1)) (* scale (ycor-vect v1))))
 
 
 (print "----------------")
@@ -141,8 +141,10 @@
 ; +
 (define painter-c
   (segments->painter (list
-                      (cons (make-vect 0.0 0.5) (make-vect 1.0 0.5))
-                      (cons (make-vect 0.5 0.0) (make-vect 0.5 1.0))
+                      (cons (make-vect 0.0 0.5) (make-vect 0.5 1.0))
+                      (cons (make-vect 0.5 1.0) (make-vect 1.0 0.5))
+                      (cons (make-vect 1.0 0.5) (make-vect 0.5 0.0))
+                      (cons (make-vect 0.5 0.0) (make-vect 0.0 0.5))
                     )))
 
 ; wave
@@ -188,7 +190,7 @@
                      (make-vect 0.35 0.65)))
 
 (define (beside painter1 painter2)
-  (let ((split-point (make-vect 0.5 0.0)))
+  (let ((split-paint (make-vect 0.5 0.0)))
     (let ((paint-left
             (transform-painter painter1
                                (make-vect 0.0 0.0)
@@ -234,15 +236,15 @@
 (print "--")
 
 (define (below-1 painter1 painter2)
-  (let ((split-point (make-vect 0.0 0.5)))
+  (let ((split-paint (make-vect 0.0 0.5)))
     (let ((paint-bottom
             (transform-painter painter1
                                (make-vect 0.0 0.0)
                                (make-vect 1.0 0.0)
-                               split-point))
+                               split-paint))
           (paint-top
             (transform-painter painter2
-                               split-point
+                               split-paint
                                (make-vect 1.0 0.5)
                                (make-vect 0.0 1.0))))
       (lambda (frame)
