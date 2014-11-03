@@ -132,6 +132,7 @@
         (else
           (error "unknown expression type -- DERIV" exp))))
 
+(print "--")
 
 (display "(deriv '(* 2 3) 'x) => ")
 (print (deriv '(* 2 3) 'x))
@@ -145,19 +146,6 @@
 (print (deriv '(** (** x y) (+ x 3)) 'x))
 (display "(deriv '(** (** x 2) 2) 'x) => ")
 (print (deriv '(** (** x 2) 2) 'x))
-
-
-
-
-
-
-(define (sum? x) (and (pair? x) (eq? (cadr x) '+)))
-(define (addend s) (car s))
-(define (augend s) (caddr s))
-(define (product? x) (and (pair? x) (eq? (cadr x) '*)))
-(define (multiplier p) (car p))
-(define (multiplicand p) (caddr p))
-(define (make-sum a1 a2) (list a1 '+ a2))
-(define (make-product m1 m2) (list m1 '* m2))
-(print (deriv '(x * 2) 'x))
+(display "(deriv '(* (** 3 2) x) 'x) => ")
+(print (deriv '(* (** 3 2) x) 'x))
 
