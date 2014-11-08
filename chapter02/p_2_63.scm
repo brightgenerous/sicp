@@ -173,5 +173,111 @@
 
 (print "----------------")
 (print "問題2.65")
+
+(define (element-of-set? x set)
+  (cond ((null? set) #f)
+        ((equal? x (car set)) #t)
+        (else (element-of-set? x (cdr set)))))
+
+(define (intersection-set set1 set2)
+  (cond ((or (null? set1) (null? set2)) '())
+        ((element-of-set? (car set1) set2)
+         (cons (car set1)
+               (intersection-set (cdr set1) set2)))
+        (else (intersection-set (cdr set1) set2))))
+
+(define (union-set-sorted set1 set2)
+  (cond ((null? set1) set2)
+        ((null? set2) set1)
+        (else
+          (let ((head1 (car set1)) (head2 (car set2)))
+            (cond ((= head1 head2)
+                   (cons head1 (union-set-sorted (cdr set1) (cdr set2))))
+                  ((< head1 head2)
+                   (cons head1 (union-set-sorted (cdr set1) set2)))
+                  (else
+                   (cons head2 (union-set-sorted set1 (cdr set2))))
+            )
+          )
+        )
+  )
+)
+
+; --
+
+(define (union-set-tree tree1 tree2)
+  (let
+    (
+      (tree->list tree->list-2)
+      (union-set union-set-sorted)
+    )
+    (list->tree (union-set (tree->list tree1) (tree->list tree2)))
+  )
+)
+
+(define (intersection-set-tree tree1 tree2)
+  (let
+    (
+      (tree->list tree->list-2)
+    )
+    (list->tree (intersection-set (tree->list tree1) (tree->list tree2)))
+  )
+)
+
 (print "--")
+
+(define tree-1
+  (list 3
+        (list 1 '() '())
+        (list 7
+              (list 5 '() '())
+              (list 9
+                    '()
+                    (list 11 '() '())))))
+(define tree-2
+  (list 5
+        (list 3
+              (list 1 '() '())
+              '())
+        (list 9
+              (list 7 '() '())
+              (list 11 '() '()))))
+
+(define tree-3
+  (list 6
+        (list 4
+              (list 2 '() '())
+              '())
+        (list 10
+              (list 8 '() '())
+              (list 12 '() '()))))
+
+(display "(union-set-tree tree-1 tree-3) => ")
+(print    (union-set-tree tree-1 tree-3))
+
+(display "(intersection-set-tree tree-1 tree-2) => ")
+(print    (intersection-set-tree tree-1 tree-2))
+
+
+(print "----------------")
+(print "問題2.66")
+
+(define (lookup given-key set-of-records key)
+  (define (lookup-itr set)
+    (if (null? set)
+      #f
+      (let
+        ((head (car set)))
+        (let
+          ((head-key (key head)))
+          (cond ((equal? given-key head-key) head)
+                ((< given-key head-key) (lookup-itr (left-branch set)))
+                (else (lookup-itr (right-branch set))))))))
+  (lookup-itr set-of-records)
+)
+
+(display "(lookup 11 tree-1 (lambda (x) x)) => ")
+(print    (lookup 11 tree-1 (lambda (x) x)))
+(display "(lookup 10 tree-1 (lambda (x) x)) => ")
+(print    (lookup 10 tree-1 (lambda (x) (+ x 1))))
 
