@@ -255,11 +255,12 @@
     (put office name (make-employee salary address)))
 
   (define (name employee)
-    (car employee))
+    (error "unsupport!!"))
+    ;(car employee))
   (define (address employee)
-    (caddr employee))
-  (define (salary employee)
     (cadr employee))
+  (define (salary employee)
+    (car employee))
 
   (put 'name       office name)
   (put 'address    office address)
@@ -334,6 +335,8 @@
 (print (find-employee-record 'kato '(office-a office-b)))
 (display "(find-employee-record 'akihiro '(office-a office-b)) => ")
 (print (find-employee-record 'akihiro '(office-a office-b)))
+(display "(find-employee-record 'akihiro '(office-a)) => ")
+(print (find-employee-record 'akihiro '(office-a)))
 
 ;;
 ;; d

@@ -229,6 +229,8 @@
 (print encoded)
 (display "size => ")
 (print (length encoded))
+(display "decode => ")
+(print (decode encoded tree-1950))
 
 (display "8 = 2^3 => ")
 (print (* (length song) 3))
