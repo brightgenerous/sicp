@@ -349,7 +349,7 @@
 
 ;; -----
 
-(define (install-polynomial-package)
+(define (install-polynomial-sparse-package)
   (define (make-poly variable term-list)
     (cons variable term-list))
   (define (variable p) (car p))
@@ -416,63 +416,272 @@
       (error "Polys not in same var -- MUL-POLY"
              (list p1 p2))))
 
-  (define (tag p) (attach-tag 'polynomial p))
+  (define (tag p) (attach-tag 'polynomial-sparse p))
 
-  (put 'make 'polynomial
+  (put 'make 'polynomial-sparse
        (lambda (var terms) (tag (make-poly var terms))))
 
-  (put 'add '(polynomial polynomial)
+  (put 'add '(polynomial-sparse polynomial-sparse)
        (lambda (p1 p2) (tag (add-poly p1 p2))))
-  (put 'mul '(polynomial polynomial)
+  (put 'mul '(polynomial-sparse polynomial-sparse)
        (lambda (p1 p2) (tag (mul-poly p1 p2))))
 
   ;; 2-87
-  (put '=zero? '(polynomial)
+  (put '=zero? '(polynomial-sparse)
        (lambda (p) (every =zero? (map coeff (term-list p)))))
 
   ;; 2-88
-  (put 'sub '(polynomial polynomial)
+  (put 'sub '(polynomial-sparse polynomial-sparse)
        (lambda (p1 p2)
          (add-poly p1
                    (mul-poly p2 (make-poly (variable p2) '((0 -1)))))))
 
+  ;; 2-90
+  (put 'variable '(polynomial-sparse)
+       (lambda (p1) (variable p1)))
+  (put 'term-list '(polynomial-sparse)
+       (lambda (p1) (term-list p1)))
+
+  'done)
+(install-polynomial-sparse-package)
+
+(define (make-polynomial-sparse var terms)
+  ((get 'make 'polynomial-sparse) var terms))
+
+;; 2-89
+(define (install-polynomial-dense-package)
+  (define (make-poly variable coeff-list)
+    (cons variable coeff-list))
+  (define (variable p) (car p))
+  (define (coeff-list p) (cdr p))
+
+  (define (variable? x) (symbol? x))
+  (define (same-variable? x y)
+    (and (variable? x) (variable? y) (eq? x y)))
+
+  (define (adjoin-coeff coeff coeff-list)
+    (cons coeff coeff-list))
+  (define (the-empty-coefflist) '())
+  (define (first-coeff coeff-list) (car coeff-list))
+  (define (rest-coeffs coeff-list) (cdr coeff-list))
+  (define (empty-coefflist? coeff-list) (null? coeff-list))
+
+  (define (add-coeffs L1 L2)
+    (cond ((empty-coefflist? L1) L2)
+          ((empty-coefflist? L2) L1)
+          (else
+            (adjoin-coeff
+              (add (first-coeff L1) (first-coeff L2))
+              (add-coeffs (rest-coeffs L1) (rest-coeffs L2))))))
+  (define (mul-coeffs L1 L2)
+    (define (inner l1 order)
+      (if (empty-coefflist? l1)
+        (the-empty-coefflist)
+        (add-coeffs (mul-coeff-by-all-coeffs (first-coeff l1) L2 order)
+                   (inner (rest-coeffs l1) (+ order 1)))))
+    (inner L1 0))
+  (define (mul-coeff-by-all-coeffs c1 L order)
+    (define (inner l)
+      (if (empty-coefflist? l)
+        (the-empty-coefflist)
+        (let ((c2 (first-coeff l)))
+          (adjoin-coeff
+            (mul c1 c2)
+            (inner (rest-coeffs l))))))
+    (padding-left (inner L) order 0))
+  (define (padding-left l count v)
+    (if (< count 1) l
+      (padding-left (cons v l) (- count 1) v)))
+
+  (define (add-poly p1 p2)
+    (if (same-variable? (variable p1) (variable p2))
+      (make-poly (variable p1)
+                 (add-coeffs (coeff-list p1)
+                            (coeff-list p2)))
+      (error "Polys not in same var -- ADD-POLY"
+             (list p1 p2))))
+  (define (mul-poly p1 p2)
+    (if (same-variable? (variable p1) (variable p2))
+      (make-poly (variable p1)
+                 (mul-coeffs (coeff-list p1)
+                            (coeff-list p2)))
+      (error "Polys not in same var -- MUL-POLY"
+             (list p1 p2))))
+
+  (define (tag p) (attach-tag 'polynomial-dense p))
+
+  (put 'make 'polynomial-dense
+       (lambda (var coeffs) (tag (make-poly var coeffs))))
+
+  (put 'add '(polynomial-dense polynomial-dense)
+       (lambda (p1 p2) (tag (add-poly p1 p2))))
+  (put 'mul '(polynomial-dense polynomial-dense)
+       (lambda (p1 p2) (tag (mul-poly p1 p2))))
+
+  (put '=zero? '(polynomial-dense)
+       (lambda (p) (every =zero? (coeff-list p))))
+
+  (put 'sub '(polynomial-dense polynomial-dense)
+       (lambda (p1 p2)
+         (add-poly p1
+                   (mul-poly p2 (make-poly (variable p2) '(-1))))))
+
+  ;; 2-90
+  (put 'variable '(polynomial-dense)
+       (lambda (p1) (variable p1)))
+  (put 'term-list '(polynomial-dense)
+       (lambda (p1)
+         (define (inner res cs count)
+           (if (empty-coefflist? cs)
+             res
+             (let ((c (first-coeff cs)))
+               (let ((r (if (=zero? c) res (cons (list count c) res))))
+                 (inner r (rest-coeffs cs) (+ count 1))
+               )
+             )
+           )
+         )
+         (inner '() (coeff-list p1) 0)))
+
+  'done)
+(install-polynomial-dense-package)
+
+(define (make-polynomial-dense var coeffs)
+  ((get 'make 'polynomial-dense) var coeffs))
+
+;; 2-90
+(define (variable p) (apply-generic 'variable p))
+(define (term-list p) (apply-generic 'term-list p))
+
+;; 2-90
+(define (install-polynomial-package)
+
+  (define (to-sparse p)
+    (let ((v (variable p)) (tl (term-list p)))
+      (make-polynomial-sparse v tl)))
+
+  (define (tag p) (attach-tag 'polynomial p))
+
+  (put 'make-from-sparse 'polynomial
+       (lambda (var terms) (tag (make-polynomial-sparse var terms))))
+  (put 'make-from-dense 'polynomial
+       (lambda (var coeffs) (tag (make-polynomial-dense var coeffs))))
+
+  (put 'add '(polynomial polynomial)
+       (lambda (p1 p2)
+         (tag (add (to-sparse p1) (to-sparse p2)))))
+  (put 'mul '(polynomial polynomial)
+       (lambda (p1 p2)
+         (tag (mul (to-sparse p1) (to-sparse p2)))))
+
+  (put '=zero? '(polynomial)
+       (lambda (p) (=zero? p)))
+
+  (put 'sub '(polynomial polynomial)
+       (lambda (p1 p2)
+         (tag (sub (to-sparse p1) (to-sparse p2)))))
+
   'done)
 (install-polynomial-package)
 
-(define (make-polynomial var terms)
-  ((get 'make 'polynomial) var terms))
+(define (make-polynomial-from-sparse var terms)
+  ((get 'make-from-sparse 'polynomial) var terms))
+(define (make-polynomial-from-dense var coeffs)
+  ((get 'make-from-dense 'polynomial) var coeffs))
 
 ;; -----
 
 (print "--")
 (print "問題2.87")
 
-(define poly1 (make-polynomial 'x '((3 1) (2 2) (1 3))))
-(define poly2 (make-polynomial 'x '((13 1) (12 2) (1 3))))
-(define poly3 (make-polynomial 'x '((3 0) (2 0) (1 0))))
-(define poly4 (make-polynomial 'x '()))
-(display "poly1 => ")
-(print poly1)
-(display "poly2 => ")
-(print poly2)
-(display "poly3 => ")
-(print poly3)
-(display "poly4 => ")
-(print poly4)
-(display "(add poly1 poly2) => ")
-(print (add poly1 poly2))
-(display "(=zero? poly1) => ")
-(print (=zero? poly1))
-(display "(=zero? poly3) => ")
-(print (=zero? poly3))
-(display "(=zero? poly4) => ")
-(print (=zero? poly4))
+(define poly-s-1 (make-polynomial-sparse 'x '((3 3) (2 2) (1 1))))
+(define poly-s-2 (make-polynomial-sparse 'x '((5 1) (4 2) (1 3) (0 4))))
+(define poly-s-3 (make-polynomial-sparse 'x '((3 0) (2 0) (1 0))))
+(define poly-s-4 (make-polynomial-sparse 'x '()))
+(display "poly-s-1 => ")
+(print poly-s-1)
+(display "poly-s-2 => ")
+(print poly-s-2)
+(display "poly-s-3 => ")
+(print poly-s-3)
+(display "poly-s-4 => ")
+(print poly-s-4)
+(display "(add poly-s-1 poly-s-2) => ")
+(print (add poly-s-1 poly-s-2))
+(display "(add poly-s-1 poly-s-3) => ")
+(print (add poly-s-1 poly-s-3))
+(display "(mul poly-s-1 poly-s-2) => ")
+(print (mul poly-s-1 poly-s-2))
+(display "(=zero? poly-s-1) => ")
+(print (=zero? poly-s-1))
+(display "(=zero? poly-s-2) => ")
+(print (=zero? poly-s-2))
+(display "(=zero? poly-s-3) => ")
+(print (=zero? poly-s-3))
+(display "(=zero? poly-s-4) => ")
+(print (=zero? poly-s-4))
 
 ;; -----
 
 (print "--")
 (print "問題2.88")
 
-(display "(sub poly1 poly2) => ")
-(print (sub poly1 poly2))
+(display "(sub poly-s-1 poly-s-2) => ")
+(print (sub poly-s-1 poly-s-2))
+
+;; -----
+
+(print "--")
+(print "問題2.89")
+
+(define poly-d-1 (make-polynomial-dense 'x '(0 1 2 3)))
+(define poly-d-2 (make-polynomial-dense 'x '(4 3 0 0 2 1)))
+(define poly-d-3 (make-polynomial-dense 'x '(0 0 0 0)))
+(define poly-d-4 (make-polynomial-dense 'x '()))
+(display "poly-d-1 => ")
+(print poly-d-1)
+(display "poly-d-2 => ")
+(print poly-d-2)
+(display "poly-d-3 => ")
+(print poly-d-3)
+(display "poly-d-4 => ")
+(print poly-d-4)
+(display "(add poly-d-1 poly-d-2) => ")
+(print (add poly-d-1 poly-d-2))
+(display "(add poly-d-1 poly-d-3) => ")
+(print (add poly-d-1 poly-d-3))
+(display "(mul poly-d-1 poly-d-2) => ")
+(print (mul poly-d-1 poly-d-2))
+(display "(=zero? poly-d-1) => ")
+(print (=zero? poly-d-1))
+(display "(=zero? poly-d-2) => ")
+(print (=zero? poly-d-2))
+(display "(=zero? poly-d-3) => ")
+(print (=zero? poly-d-3))
+(display "(=zero? poly-d-4) => ")
+(print (=zero? poly-d-4))
+
+(display "(sub poly-d-1 poly-d-2) => ")
+(print (sub poly-d-1 poly-d-2))
+
+;; -----
+
+(print "--")
+(print "問題2.90")
+
+(define poly-1 (make-polynomial-from-sparse 'x '((3 3) (2 2) (1 1))))
+(define poly-2 (make-polynomial-from-dense 'x '(4 3 0 0 2 1)))
+(display "poly-1 => ")
+(print poly-1)
+(display "poly-2 => ")
+(print poly-2)
+(display "(add poly-1 poly-2) => ")
+(print (add poly-1 poly-2))
+(display "(mul poly-1 poly-2) => ")
+(print (mul poly-1 poly-2))
+
+;; -----
+
+(print "--")
+(print "問題2.91")
 
