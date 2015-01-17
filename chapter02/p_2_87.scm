@@ -428,7 +428,7 @@
 
   ;; 2-87
   (put '=zero? '(polynomial)
-       (lambda (p) (every zero? (map coeff (term-list p)))))
+       (lambda (p) (every =zero? (map coeff (term-list p)))))
 
   ;; 2-88
   (put 'sub '(polynomial polynomial)
@@ -447,21 +447,26 @@
 (print "--")
 (print "問題2.87")
 
-(define poly1 (make-polynomial 'x '((1 1) (2 2) (3 3))))
-(define poly2 (make-polynomial 'x '((1 1) (12 2) (13 3))))
-(define poly3 (make-polynomial 'x '((1 0) (2 0) (3 0))))
+(define poly1 (make-polynomial 'x '((3 1) (2 2) (1 3))))
+(define poly2 (make-polynomial 'x '((13 1) (12 2) (1 3))))
+(define poly3 (make-polynomial 'x '((3 0) (2 0) (1 0))))
+(define poly4 (make-polynomial 'x '()))
 (display "poly1 => ")
 (print poly1)
 (display "poly2 => ")
 (print poly2)
 (display "poly3 => ")
 (print poly3)
+(display "poly4 => ")
+(print poly4)
 (display "(add poly1 poly2) => ")
 (print (add poly1 poly2))
 (display "(=zero? poly1) => ")
 (print (=zero? poly1))
 (display "(=zero? poly3) => ")
 (print (=zero? poly3))
+(display "(=zero? poly4) => ")
+(print (=zero? poly4))
 
 ;; -----
 
