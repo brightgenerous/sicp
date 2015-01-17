@@ -206,22 +206,23 @@
   (define (numer x) (car x))
   (define (denom x) (cdr x))
   (define (make-rat n d)
+    ;; (cons n d)) ;; 2-93
     (let ((g (gcd n d)))
-      (cons (/ n g) (/ d g))))
+      (cons (division n g) (division d g))))
   (define (add-rat x y)
-    (make-rat (+ (* (numer x) (denom y))
-                 (* (numer y) (denom x)))
-              (* (denom x) (denom y))))
+    (make-rat (add (mul (numer x) (denom y))
+                 (mul (numer y) (denom x)))
+              (mul (denom x) (denom y))))
   (define (sub-rat x y)
-    (make-rat (- (* (numer x) (denom y))
-                 (* (numer y) (denom x)))
-              (* (denom x) (denom y))))
+    (make-rat (sub (mul (numer x) (denom y))
+                 (mul (numer y) (denom x)))
+              (mul (denom x) (denom y))))
   (define (mul-rat x y)
-    (make-rat (* (numer x) (numer y))
-              (* (denom x) (denom y))))
+    (make-rat (mul (numer x) (numer y))
+              (mul (denom x) (denom y))))
   (define (div-rat x y)
-    (make-rat (* (numer x) (denom y))
-              (* (denom x) (numer y))))
+    (make-rat (mul (numer x) (denom y))
+              (mul (denom x) (numer y))))
 
   (define (tag x) (attach-tag 'rational x))
 
@@ -269,9 +270,11 @@
 (define (sub x y) (apply-generic 'sub x y))
 (define (mul x y) (apply-generic 'mul x y))
 (define (div x y) (apply-generic 'div x y))
+(define (division x y) (apply-generic 'division x y))
 (define (equ? x y) (apply-generic 'equ? x y))
 (define (=zero? x) (apply-generic '=zero? x))
 (define (raise x) (apply-generic 'raise x))
+(define (gcd a b) (apply-generic 'gcd a b))
 
 ;; -----
 
@@ -438,6 +441,16 @@
       (error "Polys not in same var -- DIV-POLY"
              (list p1 p2))))
 
+  ;; 2-94
+  (define (division-terms p1 p2)
+    (car (div-terms p1 p2)))
+  (define (remainder-terms p1 p2)
+    (cadr (div-terms p1 p2)))
+  (define (gcd-terms p1 p2)
+    (if (empty-termlist? p2)
+      p1
+      (gcd-terms p2 (remainder-terms p1 p2))))
+
   (define (tag p) (attach-tag 'polynomial-sparse p))
 
   (put 'make 'polynomial-sparse
@@ -467,6 +480,14 @@
   ;; 2-91
   (put 'div '(polynomial-sparse polynomial-sparse)
        (lambda (p1 p2) (tag (div-poly p1 p2))))
+
+  ;; 2-94
+  (put 'division '(polynomial-sparse polynomial-sparse)
+       (lambda (p1 p2)
+         (tag (make-poly (variable p1) (division-terms (term-list p1) (term-list p2))))))
+  (put 'gcd '(polynomial-sparse polynomial-sparse)
+       (lambda (p1 p2)
+         (tag (make-poly (variable p1) (gcd-terms (term-list p1) (term-list p2))))))
 
   'done)
 (install-polynomial-sparse-package)
@@ -725,4 +746,42 @@
 (print (div (mul poly-s-2 poly-s-1) poly-s-2))
 (display "(div (mul poly-s-2 poly-s-1) poly-s-1) => ")
 (print (div (mul poly-s-2 poly-s-1) poly-s-1))
+
+;; -----
+
+(print "--")
+(print "問題2.92")
+
+;; -----
+
+(print "--")
+(print "問題2.93")
+
+(define p1 (make-polynomial-sparse 'x '((2 1) (0 1))))
+(define p2 (make-polynomial-sparse 'x '((3 1) (0 1))))
+(define rf (make-rational p2 p1))
+(display "p1 => ")
+(print p1)
+(display "p2 => ")
+(print p2)
+(display "rf => ")
+(print rf)
+(display "(add rf rf) => ")
+(print (add rf rf))
+
+;; -----
+
+(print "--")
+(print "問題2.94")
+(define p1 (make-polynomial-sparse 'x '((4 1) (3 -1) (2 -2) (1 2))))
+(define p2 (make-polynomial-sparse 'x '((3 1) (1 -1))))
+(define rf (make-rational p2 p1))
+(display "p1 => ")
+(print p1)
+(display "p2 => ")
+(print p2)
+(display "rf => ")
+(print rf)
+(display "(add rf rf) => ")
+(print (add rf rf))
 
