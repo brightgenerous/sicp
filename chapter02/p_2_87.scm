@@ -773,6 +773,7 @@
 
 (print "--")
 (print "問題2.94")
+
 (define p1 (make-polynomial-sparse 'x '((4 1) (3 -1) (2 -2) (1 2))))
 (define p2 (make-polynomial-sparse 'x '((3 1) (1 -1))))
 (define rf (make-rational p2 p1))
@@ -784,4 +785,21 @@
 (print rf)
 (display "(add rf rf) => ")
 (print (add rf rf))
+
+;; -----
+
+(print "--")
+(print "問題2.95")
+
+(define p1 (make-polynomial-sparse 'x '((2 1) (1 -2) (0 1))))
+(define p2 (make-polynomial-sparse 'x '((2 11) (0 7))))
+(define p3 (make-polynomial-sparse 'x '((1 13) (0 5))))
+(define q1 (mul p1 p2))
+(define q2 (mul p1 p3))
+(display "(div q1 p2) => ")
+(print (div q1 p2))
+(display "(div q2 p3) => ")
+(print (div q2 p3))
+(display "(gcd q1 q2) => ")
+(print (gcd q1 q2))
 
