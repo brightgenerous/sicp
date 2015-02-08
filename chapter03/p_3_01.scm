@@ -139,8 +139,10 @@
   (define (make-monitored f)
     (let ((count 0))
       (define (called) (set! count (+ count 1)))
+      (define (reset) (set! count 0) count)
       (define (dispatch arg)
         (cond ((eq? arg 'how-many-calls?) count)
+              ((eq? arg 'reset-count) (reset))
               (else
                 (called)
                 (f arg))))
@@ -155,6 +157,12 @@
   (print (a 'how-many-calls?))
   (display "(a 100) => ")
   (print (a 100))
+  (display "(a 'how-many-calls?) => ")
+  (print (a 'how-many-calls?))
+  (display "(a 'how-many-calls?) => ")
+  (print (a 'how-many-calls?))
+  (display "(a 'reset-count) => ")
+  (print (a 'reset-count))
   (display "(a 'how-many-calls?) => ")
   (print (a 'how-many-calls?))
 
