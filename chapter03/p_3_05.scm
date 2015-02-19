@@ -77,7 +77,7 @@
 
   (define x 5)
   (define y 7)
-  (define r 3)
+  (define r 3000)
 
   (define (randX)
     (random-in-range (- x r) (+ x r)))
@@ -87,13 +87,14 @@
     (lambda ()
       (<= (+ (expt (- (randX) x) 2) (expt (- (randY) y) 2)) (expt r 2))))
 
-  (* (expt (* r 2) 2) (monte-carlo trials cesaro-test)))
+  (/ (* (expt (* r 2) 2) (monte-carlo trials cesaro-test)) (expt r 2)))
 
 ; --
 
 (map
   (lambda (x)
     (display (string-append "(estimate-integral " (number->string x) ") => "))
+    ; (format "x=~a" x)
     (print (+ (estimate-integral x) 0.0)))
   '(3 30 300 3000 30000))
 

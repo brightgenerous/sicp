@@ -74,9 +74,9 @@
           (begin
             (set! val x)
             x)
-          val))))
+          (* x val)))))
 
-  (print (+ (f 0) (f 1)))
+  (print (+ (f 1) (f 0)))
 ))
 
 ;; -----
